@@ -1,20 +1,24 @@
 # Read test dataset for the 'ResponseSys' domain — loaded by the XxxReadTests classes via:
-#   MigrateXxxDataAsync<TestData>(["read-data.seed.yaml"], DbMigration.ConfigureMigrationArgs)
+#   MigratePostgresDataAsync<TestData>(["read-data.seed.yaml"], DbMigration.ConfigureMigrationArgs)
 #
-# Contains the STABLE rows that GET/query tests assert against. Mutate tests load the separate
-# 'mutate-data.seed.yaml' so mutations never disturb these read expectations.
+# IMPORTANT — what the test migration path already seeds for you:
+#   ConfigureMigrationArgs adds the Database assembly, so every test migrate ALSO applies the
+#   production Data phase: 'ref-data.seed.yaml' (threat_level / leviathan_status / signal_severity
+#   codes) AND 'masters.seed.pgsql' (the 4-strong leviathan roster, 4 dispatch_unit rows, 2
+#   last_stand_city rows). DataResetFilterPredicate resets the 'responsesys' schema first, so this
+#   runs cleanly every cycle. Therefore:
+#     * DO NOT re-seed ref-data or leviathan/dispatch_unit/last_stand_city here — that collides with
+#       the production seed (duplicate-key) within the same cycle. The Roster/Dispatch/Cities read
+#       tests assert against the deterministic production masters data instead.
+#     * 'signal_event' is the ONLY table with no production seed, so it is seeded here to give the
+#       feed read/paging tests a small, deterministic, order-assertable dataset.
 #
-# DbEx YAML format: schema (top-level) -> '- <table>:' (array item, note the leading '-') -> rows.
-#   * Identifiers and GUID foreign-keys use '^N' (deterministic: ^1 == 1.ToGuid()).
-#   * Reference data is linked by CODE (e.g. gender_code: M), never by id/FK.
-#   * Schema, table, AND column names must match the database's ACTUAL casing (what the migration created):
-#       - PostgreSQL (default): lowercase snake_case  (schema 'bar', table 'employee', column 'employee_id')
-#       - SQL Server:           PascalCase            (schema 'Bar', table 'Employee', column 'EmployeeId')
-#     A wrong-cased schema/table fails the seed with "Table '...' does not exist".
-#
-# Example (PostgreSQL — replace with your domain's schema/tables/rows):
-#
-# bar:
-#   - employee:
-#     - { employee_id: ^1, first_name: Bob, last_name: Smith, gender_code: M, salary: 50000, date_of_birth: 1990-01-01 }
-#     - { employee_id: ^2, first_name: Jane, last_name: Doe, gender_code: F, salary: 60000, date_of_birth: 1985-06-15 }
+# DbEx YAML: schema -> '- <table>:' -> rows (inline objects, PostgreSQL lowercase snake_case).
+# Id columns are VARCHAR(50); leviathan_id values reference production masters rows (lev-1..lev-3).
+responsesys:
+  # Signal feed (GET /feed ORDER BY timestamp DESC -> sig-4, sig-3, sig-2, sig-1; total = 4).
+  - signal_event:
+    - { signal_event_id: sig-1, timestamp: 1000, severity_code: INF, message: Sensor baseline nominal,    leviathan_id: lev-1 }
+    - { signal_event_id: sig-2, timestamp: 2000, severity_code: WRN, message: Subsurface tremor detected, leviathan_id: lev-1 }
+    - { signal_event_id: sig-3, timestamp: 3000, severity_code: OPS, message: Dispatch units mobilizing,  leviathan_id: lev-2 }
+    - { signal_event_id: sig-4, timestamp: 4000, severity_code: CRT, message: Landfall imminent,          leviathan_id: lev-3 }

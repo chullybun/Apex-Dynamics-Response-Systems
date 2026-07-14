@@ -72,3 +72,110 @@ Completed the database layer and the reference-data vertical. `coreex-ai` was in
 - The DbEx migrator's standalone `codegen` command is not enabled; DbEx code-gen runs only inside `dotnet run -- all`.
 - CoreEx `*.CodeGen` resolves `ref-data.yaml` relative to the **current directory** — run `dotnet run` from *inside* the CodeGen project folder (or the config path resolves to the solution root and fails).
 - The clean `coreex` scaffold omits own-namespace `global using`s; add them alongside the code that needs them (CS0246/CS0103 after CodeGen).
+
+---
+
+# Changes: CoreEx Backend — Leviathan read vertical (Phase 3/4 slice)
+
+- Implementation date: 2026-07-14 (continued)
+
+## Summary
+
+Implemented the read side of the `Leviathan` entity end-to-end and verified it at runtime against the live Postgres database. Build clean; `GET /roster` returns the seeded 4-leviathan roster with reference-data codes.
+
+## Added
+
+- `src/Contracts/Leviathan.cs` — `[Contract]` `Leviathan` (+`LeviathanCollection`), `IIdentifier<string>`+`IETag`, flat coordinates, `[ReferenceData<LeviathanStatus>] StatusCode` → JSON `status`, `[ReferenceData<ThreatLevel>] ThreatCode` → JSON `threat`.
+- `src/Infrastructure/Mapping/LeviathanMapper.cs` — one-way Persistence→Contract mapper (read slice).
+- `src/Application/Repositories/ILeviathanRepository.cs` + `src/Infrastructure/Repositories/LeviathanRepository.cs` — `[ScopedService<>]`, EfDb query, logical-delete filter, order-by codename, get-by-id.
+- `src/Application/ILeviathanService.cs` + `src/Application/LeviathanService.cs` — `[ScopedService<>]`, GetAll + GetById.
+- `src/Api/Controllers/RosterController.cs` — thin `WebApi` controller: `GET /roster`, `GET /roster/{id}` (+HEAD).
+- `src/Api/GlobalUsing.cs` — added `global using ...Application;`.
+
+## Validation (runtime)
+
+- `dotnet build` → 0 errors (1 benign scaffold warning + 1 pre-existing generated-mapper CS8601).
+- `GET /roster` → 200, 4 leviathans (Gorathos, Vespyra, Terrakon, Nyxmora).
+- `GET /roster/lev-1` → 200; JSON `{"id":"lev-1","codename":"Gorathos",...,"status":"LND",...,"threat":"CAT",...,"etag":"..."}`. Ref-data codes serialize as `status`/`threat` — aligns with front-end `src/mock/types.ts` field names.
+- EF SQL verified: logical-delete predicate + order-by codename + parameterized get-by-id.
+
+## Key operational finding — running hosts standalone
+
+The `coreex` API/Relay/Subscribe hosts expect `ConnectionStrings:Postgres` and `ConnectionStrings:redis` to be injected by **Aspire**. Running a host bare via `dotnet run` yields env `Production` with no connection strings → `InvalidOperationException: ConnectionString is missing` and an HTTP 500 at controller activation (DI cannot build `ResponseSysEfDb`). To smoke-test a host standalone, provide them, e.g.:
+
+```powershell
+$env:ConnectionStrings__Postgres = 'Host=127.0.0.1;Port=5432;Database=responsesys;Username=postgres;Password=yourStrong#!Password'
+$env:ConnectionStrings__redis = 'localhost:6379'
+$env:ASPNETCORE_ENVIRONMENT = 'Development'
+dotnet run --project src/ApexDynamics.TitanWatch.ResponseSys.Api
+```
+
+The proper long-term path is an Aspire AppHost (or appsettings.Development.json / user-secrets) so hosts resolve connection strings without manual env vars.
+
+## Deferred / notes
+
+- `LeviathanMapper` is one-way (read slice); promote to `BiDirectionMapper` when mutate endpoints are added.
+- `GetLive` (sim-derived position/range/status) is Phase 5.
+- Remaining entities (SignalEvent, DispatchUnit, LastStandCity) not yet contracted/served.
+
+---
+
+# Changes: CoreEx Backend — SignalEvent / DispatchUnit / LastStandCity read verticals
+
+- Implementation date: 2026-07-14 (continued)
+
+## Summary
+
+Added read-only verticals for the remaining three entities (21 files), mirroring the verified Leviathan recipe. All four read endpoints are now runtime-verified against Postgres. User added `Api/appsettings.Development.json` (Aspire Npgsql + Redis connection strings), so hosts now run standalone with just `ASPNETCORE_ENVIRONMENT=Development` (supersedes the env-var workaround).
+
+## Added (per entity: contract, mapper, repo iface+impl, service iface+impl, controller)
+
+- **SignalEvent** → `FeedController` `GET /feed` (**paged**, `[Paging(supportsCount:true)]`, `ORDER BY timestamp DESC`, `ToMappedItemsResultAsync`) + `GET /feed/{id}`. Contract: `IIdentifier<string>` (no ETag), `[ReferenceData<SignalSeverity>] SeverityCode` → JSON `severity`.
+- **DispatchUnit** → `DispatchController` `GET /dispatch` (ORDER BY name) + `/{id}`. Fields Name/Available/Capacity.
+- **LastStandCity** → `CitiesController` `GET /cities` (ORDER BY name) + `/{id}`. Fields Name/Side/Population.
+- No `global using` changes needed (Leviathan work already covered them).
+
+## Validation (runtime, Development env via appsettings.Development.json)
+
+- `dotnet build` → 0 errors (2 pre-existing warnings).
+- `GET /dispatch` → 4 units: Deploy Mechs 4/4, Evac Sector 8/8, Raise Barrier 3/3, Scramble Jets 6/6 (matches mock INITIAL_DISPATCH).
+- `GET /cities` → BREMERTON (left, 412000), OLYMPIA (right, 318000) (matches mock LAST_STAND_CITIES).
+- `GET /feed?$take=2` → 200, empty `[]` — EXPECTED: `signal_event` has no seed rows; the feed is produced at runtime by the Phase 5 simulation engine. Paged query executes (`LIMIT/OFFSET`, `ORDER BY timestamp DESC` confirmed in SQL log).
+
+## Read side complete
+
+All four entities now have GET endpoints: `/roster`, `/roster/{id}`, `/feed` (paged), `/feed/{id}`, `/dispatch`, `/dispatch/{id}`, `/cities`, `/cities/{id}`, plus generated ref-data endpoints. Remaining: command endpoints (dispatch/alert), the simulation engine (to populate the feed + live roster movement), CORS, and the front-end HttpAdapter.
+
+---
+
+# Changes: CoreEx Backend — API read integration tests
+
+- Implementation date: 2026-07-14 (continued)
+
+## Summary
+
+Added UnitTestEx `*.Test.Api` intra-domain integration tests for all four GET verticals as a stabilization checkpoint before the command/simulation work. `dotnet test` → **25/25 pass** (includes the scaffolded Swagger/Health tests). Dev DB restored to clean masters-only seed afterward via `-- all`.
+
+## Added / modified
+
+- `tests/*.Test.Api/RosterReadTests.cs`, `DispatchReadTests.cs`, `CitiesReadTests.cs`, `FeedReadTests.cs` (partial `HostTests`).
+- `tests/*.Test.Common/Data/read-data.seed.yaml` — seeds `signal_event` (4 rows, ascending timestamps, severities INF/WRN/OPS/CRT); the other 3 entities assert against the production masters seed.
+- `tests/*.Test.Api/GlobalUsing.cs` — added `global using ...Contracts;`.
+
+## Coverage
+
+- Roster: list (4, ordered by codename), get-by-id (codename + `threat`=CAT + `status`=LND + hp + etag), JSON ref-data shape (`threat`/`status`/`etag`), 404.
+- Dispatch: list (4, name asc), get-by-id (name/available/capacity), 404.
+- Cities: list (2, name asc), get-by-id (name/side/population), 404.
+- Feed: list (4, timestamp DESC), `$take`, `$skip`, `$take&$count=true` → `X-Paging-Total-Count`, get-by-id (`severity`=INF), 404.
+
+## Key findings
+
+- The Test.Api migrate path (`MigratePostgresDataAsync<TestData>(..., DbMigration.ConfigureMigrationArgs)`) **DOES apply the production Data phase** — `masters.seed.pgsql` + `ref-data.seed.yaml` — and resets the `responsesys` schema each run. So test seed files should add ONLY tables with no production seed (here: `signal_event`); re-seeding masters/ref-data causes duplicate-key failures.
+- CoreEx paging total-count header is **`X-Paging-Total-Count`** (not `x-total-count`).
+- Running Test.Api mutates the shared `responsesys` DB (reset + re-seed). Restore a clean feed-empty state with `dotnet run --project tools/*.Database -- all`.
+
+## Validation
+
+- `dotnet test tests/*.Test.Api` → Passed: 25, Failed: 0, Skipped: 0.
+- Dev DB restored (`-- all`): ref-data 5/5/4 rows; masters re-seeded; feed empty again.

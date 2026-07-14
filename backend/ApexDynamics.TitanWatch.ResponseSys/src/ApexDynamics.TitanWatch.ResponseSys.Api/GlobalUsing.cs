@@ -12,4 +12,5 @@ global using Microsoft.AspNetCore.Mvc;
 global using NSwag.Annotations;
 global using System.Net;
 global using System.Text.Json;
+global using ApexDynamics.TitanWatch.ResponseSys.Application;
 global using ApexDynamics.TitanWatch.ResponseSys.Contracts;
