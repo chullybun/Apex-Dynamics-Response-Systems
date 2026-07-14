@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Avanade/CoreEx/refs/heads/main/schema/coreex-refdata.json
+# Reference data entity definitions; see https://github.com/Avanade/CoreEx/blob/main/src/CoreEx.CodeGen for more information.
+apiProjectPath: ../../src/ApexDynamics.TitanWatch.ResponseSys.Api
+applicationProjectPath: ../../src/ApexDynamics.TitanWatch.ResponseSys.Application
+contractsProjectPath: ../../src/ApexDynamics.TitanWatch.ResponseSys.Contracts
+dataProjectPath: ../../src/ApexDynamics.TitanWatch.ResponseSys.Infrastructure
+collectionSortOrder: Code
+repository: EntityFramework
+entities:
+- name: ThreatLevel
+  properties:
+  - name: Color
+    type: string
+- name: LeviathanStatus
+- name: SignalSeverity

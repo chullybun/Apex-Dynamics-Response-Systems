@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="AwesomeAssertions" />
+    <PackageReference Include="CoreEx.UnitTesting" />
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NUnit" />
+    <PackageReference Include="NUnit.Analyzers" />
+    <PackageReference Include="NUnit3TestAdapter" />
+    <PackageReference Include="UnitTestEx.NUnit" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ApexDynamics.TitanWatch.ResponseSys.Application\ApexDynamics.TitanWatch.ResponseSys.Application.csproj" />
+    <ProjectReference Include="..\..\src\ApexDynamics.TitanWatch.ResponseSys.Contracts\ApexDynamics.TitanWatch.ResponseSys.Contracts.csproj" />
+    <ProjectReference Include="..\ApexDynamics.TitanWatch.ResponseSys.Test.Common\ApexDynamics.TitanWatch.ResponseSys.Test.Common.csproj" />
+    <!-- Required by EntryPoint.cs: JsonDataReader.ParseYaml<ApexDynamics.TitanWatch.ResponseSys.Database.Program> reads the embedded ref-data seed. -->
+    <ProjectReference Include="..\..\tools\ApexDynamics.TitanWatch.ResponseSys.Database\ApexDynamics.TitanWatch.ResponseSys.Database.csproj" />
+  </ItemGroup>
+</Project>

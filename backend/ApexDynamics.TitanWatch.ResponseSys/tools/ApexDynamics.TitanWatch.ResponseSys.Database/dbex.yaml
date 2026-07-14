@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Avanade/DbEx/refs/heads/main/schema/dbex.json
+dotNetDataProjectPath: ../../src/ApexDynamics.TitanWatch.ResponseSys.Infrastructure
+schema: responsesys
+outbox: true
+outboxName: outbox
+tables:
+# Reference-data
+- name: threat_level
+- name: leviathan_status
+- name: signal_severity
+# Transactional-data
+- name: leviathan
+- name: signal_event
+- name: dispatch_unit
+- name: last_stand_city

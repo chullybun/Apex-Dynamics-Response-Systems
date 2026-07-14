@@ -28,16 +28,16 @@ Derived objective: keep the existing UI and `types.ts` contract shape intact so 
 
 ### Phase 1: Prerequisites, scaffold & infrastructure
 <!-- parallelizable: false -->
-- [ ] Confirm prerequisites (.NET SDK 10+, Podman/Docker) — details: Phase 1 Step 1
-- [ ] Choose monorepo placement (`backend/` subfolder) and solution name `ApexDynamics.TitanWatch.ResponseSys` — details: Phase 1 Step 2
-- [ ] Install template pack and AI assets (`dotnet new install CoreEx.Template`; `dotnet new coreex-ai --app-folder backend`) — details: Phase 1 Step 3
-- [ ] Scaffold solution (`dotnet new coreex`, defaults) — details: Phase 1 Step 4
-- [ ] Start infrastructure and verify build (`compose up -d`; `dotnet build`) — details: Phase 1 Step 5
+- [x] Confirm prerequisites (.NET SDK 10+, Podman/Docker) — details: Phase 1 Step 1 — verified .NET 10.0.301, Podman (machine running); Docker absent (Podman preferred)
+- [x] Choose monorepo placement (`backend/` subfolder) and solution name `ApexDynamics.TitanWatch.ResponseSys` — details: Phase 1 Step 2
+- [x] Install template pack and AI assets — `CoreEx.Template` already installed (coreex* templates present); `coreex-ai` deferred (optional, writes to repo `.github/`)
+- [x] Scaffold solution (`dotnet new coreex`, defaults) — details: Phase 1 Step 4 — created Contracts/Application/Infrastructure + Test.Common/Test.Unit + CodeGen/Database
+- [x] Verify build (`dotnet build`) — succeeded, 0 errors, 1 benign scaffold warning. Infrastructure startup (`podman compose up -d`) deferred to Phase 2 (large image pull) — details: Phase 1 Step 5
 
 ### Phase 2: Reference data
 <!-- parallelizable: false -->
-- [ ] Define `ThreatLevel`, `LeviathanStatus`, `SignalSeverity` in `tools/*.CodeGen/ref-data.yaml` — three-character uppercase `Code`, sentence-case `Text`, plus color/rank metadata — details: Phase 2 Step 1
-- [ ] Run CodeGen + Database migration to generate/seed ref-data — details: Phase 2 Step 2
+- [x] Define `ThreatLevel`, `LeviathanStatus`, `SignalSeverity` in `tools/*.CodeGen/ref-data.yaml` — three-character uppercase `Code`, sentence-case `Text`, plus color/rank metadata — DB migrations + seed done; DbEx persistence models generated
+- [x] Run CodeGen + Database migration to generate/seed ref-data — CoreEx CodeGen generated ref-data contracts/controller/service/repository/mappers; global usings wired; build clean
 
 ### Phase 3: Contracts, persistence & mapping
 <!-- parallelizable: false -->

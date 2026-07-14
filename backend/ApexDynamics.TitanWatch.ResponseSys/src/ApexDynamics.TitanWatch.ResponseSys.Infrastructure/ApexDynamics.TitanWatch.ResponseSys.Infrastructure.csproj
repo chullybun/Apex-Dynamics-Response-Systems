@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\ApexDynamics.TitanWatch.ResponseSys.Application\ApexDynamics.TitanWatch.ResponseSys.Application.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CoreEx.Data" />
+    <PackageReference Include="CoreEx.Database.Postgres" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="CoreEx.EntityFrameworkCore" />
+    <PackageReference Include="CoreEx.RefData" />
+  </ItemGroup>
+</Project>

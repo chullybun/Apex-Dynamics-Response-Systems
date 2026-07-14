@@ -1,0 +1,16 @@
+global using AwesomeAssertions;
+global using CoreEx;
+global using CoreEx.RefData;
+global using CoreEx.RefData.Abstractions;
+global using CoreEx.UnitTesting;
+global using CoreEx.UnitTesting.Data;
+global using CoreEx.Validation;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Hosting;
+global using Moq;
+global using NUnit.Framework;
+global using UnitTestEx;
+global using UnitTestEx.NUnit;
+global using ApexDynamics.TitanWatch.ResponseSys.Application;
+global using ApexDynamics.TitanWatch.ResponseSys.Application.Repositories;
+global using ExecutionContext = CoreEx.ExecutionContext;
