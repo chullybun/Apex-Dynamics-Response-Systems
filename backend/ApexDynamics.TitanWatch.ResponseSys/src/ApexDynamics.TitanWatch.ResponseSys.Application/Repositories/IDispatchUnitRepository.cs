@@ -13,4 +13,9 @@ public interface IDispatchUnitRepository
     /// <param name="cancellationToken">The <see cref="CancellationToken"/>.</param>
     /// <returns>The <see cref="DispatchUnit"/> where found; otherwise, <c>null</c>.</returns>
     Task<DispatchUnit?> GetAsync(string id, CancellationToken cancellationToken = default);
+
+    /// <summary>Updates the mutable <see cref="DispatchUnit.Available"/> count for the specified <see cref="DispatchUnit"/>.</summary>
+    /// <param name="dispatchUnit">The <see cref="DispatchUnit"/> carrying the updated available count.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/>.</param>
+    Task UpdateAsync(DispatchUnit dispatchUnit, CancellationToken cancellationToken = default);
 }

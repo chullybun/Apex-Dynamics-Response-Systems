@@ -10,16 +10,16 @@ public class SimulationService(IUnitOfWork unitOfWork, ILeviathanRepository levi
     #region Ported simulation constants
 
     /// <summary>Expected signal-feed arrivals per tick (~24/min ≈ 0.4/sec); see <c>scheduleNext</c> in the mock.</summary>
-    private const double FeedLambdaPerTick = 24.0 / 60.0;
+    private const double _feedLambdaPerTick = 24.0 / 60.0;
 
     #endregion
 
     #region Ported phrase pools (feed.ts)
 
-    private static readonly string[] Sensors = ["COASTAL ARRAY", "ORBITAL UPLINK", "SEISMIC GRID", "SONAR PICKET", "THERMAL DRONE", "CIVIL DEFENSE NET"];
-    private static readonly string[] Sectors = ["ALPHA", "BRAVO", "CHARLIE", "DELTA", "ECHO", "FOXTROT"];
+    private static readonly string[] _sensors = ["COASTAL ARRAY", "ORBITAL UPLINK", "SEISMIC GRID", "SONAR PICKET", "THERMAL DRONE", "CIVIL DEFENSE NET"];
+    private static readonly string[] _sectors = ["ALPHA", "BRAVO", "CHARLIE", "DELTA", "ECHO", "FOXTROT"];
 
-    private static readonly string[] WarnClauses =
+    private static readonly string[] _warnClauses =
     [
         "energy signature spiking past safe thresholds",
         "hull-displacement wake widening fast",
@@ -29,7 +29,7 @@ public class SimulationService(IUnitOfWork unitOfWork, ILeviathanRepository levi
         "harmonic roar registering across the seismic grid"
     ];
 
-    private static readonly string[] LinkedOpsClauses =
+    private static readonly string[] _linkedOpsClauses =
     [
         "interception lattice realigning to its heading",
         "shore batteries walking fire onto its track",
@@ -37,7 +37,7 @@ public class SimulationService(IUnitOfWork unitOfWork, ILeviathanRepository levi
         "barrier grid charging along the projected path"
     ];
 
-    private static readonly string[] SectorOpsClauses =
+    private static readonly string[] _sectorOpsClauses =
     [
         "Mobilizing the rapid-response wing",
         "Hardening the seawall cordon",
@@ -75,7 +75,7 @@ public class SimulationService(IUnitOfWork unitOfWork, ILeviathanRepository levi
             }
 
             // 2. Generate ambient signal-feed events (~0.4/sec).
-            var count = PoissonSample(FeedLambdaPerTick);
+            var count = PoissonSample(_feedLambdaPerTick);
             for (var i = 0; i < count; i++)
                 await PublishSignalAsync(BuildSignalEvent(roster, timestampMs), ct).ConfigureAwait(false);
 
@@ -114,23 +114,23 @@ public class SimulationService(IUnitOfWork unitOfWork, ILeviathanRepository levi
     /// <summary>Composes the human-readable message for a severity/leviathan combination (ported from <c>messageFor</c>).</summary>
     private static string MessageFor(string severityCode, Leviathan? leviathan)
     {
-        var sensor = Pick(Sensors);
-        var sector = Pick(Sectors);
+        var sensor = Pick(_sensors);
+        var sector = Pick(_sectors);
 
         if (leviathan is not null)
         {
             return severityCode switch
             {
-                "WRN" => $"{sensor}: {leviathan.Codename} tracking toward Sector {sector} — {Pick(WarnClauses)}",
-                "OPS" => $"Dispatch update on {leviathan.Codename}: {Pick(LinkedOpsClauses)}",
+                "WRN" => $"{sensor}: {leviathan.Codename} tracking toward Sector {sector} — {Pick(_warnClauses)}",
+                "OPS" => $"Dispatch update on {leviathan.Codename}: {Pick(_linkedOpsClauses)}",
                 _ => $"{sensor} contact: {leviathan.Codename} signature stable in Sector {sector}."
             };
         }
 
         return severityCode switch
         {
-            "WRN" => $"{sensor}: anomalous reading in Sector {sector} — {Pick(WarnClauses)}",
-            "OPS" => $"Operations: {Pick(SectorOpsClauses)} for Sector {sector}.",
+            "WRN" => $"{sensor}: anomalous reading in Sector {sector} — {Pick(_warnClauses)}",
+            "OPS" => $"Operations: {Pick(_sectorOpsClauses)} for Sector {sector}.",
             _ => $"{sensor} nominal across Sector {sector}."
         };
     }

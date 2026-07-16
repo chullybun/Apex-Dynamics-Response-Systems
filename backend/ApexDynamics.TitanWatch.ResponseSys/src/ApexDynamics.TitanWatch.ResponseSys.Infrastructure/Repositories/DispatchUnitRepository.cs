@@ -22,4 +22,19 @@ public class DispatchUnitRepository(ResponseSysEfDb ef) : IDispatchUnitRepositor
 
         return items.FirstOrDefault();
     }
+
+    /// <inheritdoc/>
+    public async Task UpdateAsync(Contracts.DispatchUnit dispatchUnit, CancellationToken cancellationToken = default)
+    {
+        dispatchUnit.ThrowIfNull();
+
+        // Read the current persistence model (preserving identity and name), then apply only the mutable available count.
+        var model = await _ef.Model<Persistence.DispatchUnit>().GetAsync(dispatchUnit.Id, cancellationToken).ConfigureAwait(false);
+        if (model is null)
+            return;
+
+        model.Available = dispatchUnit.Available;
+
+        await _ef.Model<Persistence.DispatchUnit>().UpdateAsync(model, cancellationToken).ConfigureAwait(false);
+    }
 }

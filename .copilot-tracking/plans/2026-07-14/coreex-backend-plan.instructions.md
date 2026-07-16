@@ -49,9 +49,9 @@ Derived objective: keep the existing UI and `types.ts` contract shape intact so 
 <!-- parallelizable: false -->
 - [~] `RosterService` (Get, GetById, GetLive) — `LeviathanService` done (GetAll, GetById); GetLive not needed — simulation writes directly to `leviathan` table, so existing GetAll/GetById already reflect live state
 - [x] Read services for all 4 entities — Leviathan/SignalEvent(paged)/DispatchUnit/LastStandCity services + repositories + GET controllers (`/roster`, `/feed`, `/dispatch`, `/cities`); all runtime-verified
-- [ ] `DispatchService` (deploy w/ capacity validation + repel effect) — command side, details: Phase 4 Step 2
-- [ ] `AlertService` (raise/stand-down) — command side, details: Phase 4 Step 3
-- [ ] Validators/policies for command endpoints — details: Phase 4 Step 4
+- [x] `DispatchService` (deploy w/ capacity validation + repel effect) — command side, details: Phase 4 Step 2 — `IDispatchService`/`DispatchService.DeployAsync`: validates request, loads leviathan + dispatch unit (404 on either miss), inline `BusinessException` guard when `Available <= 0` ("dispatch-unit-exhausted"), decrements capacity, applies clamped repel knockback, publishes `titanwatch.signal-event` outbox event atomically via `IUnitOfWork.TransactionAsync`
+- [x] `AlertService` (raise/stand-down) — command side, details: Phase 4 Step 3 — `IAlertService`/`AlertService.RaiseAsync`: transient command only (no persisted alert-state table by design), `Active` defaults to `true` when omitted, persists + publishes a `SignalEvent` (WRN/OPS severity)
+- [x] Validators/policies for command endpoints — details: Phase 4 Step 4 — `DispatchRequestValidator` (first `Validator<T,TSelf>` in this repo, `Application/Validators/`); capacity guard is an inline `BusinessException` in `DispatchService` rather than a separate Policy class (single boolean condition, used once — a dedicated Policy would be over-engineering)
 
 ### Phase 5: Server-authoritative simulation engine
 <!-- parallelizable: false -->
@@ -60,9 +60,9 @@ Derived objective: keep the existing UI and `types.ts` contract shape intact so 
 
 ### Phase 6: API host, endpoints, OpenAPI & CORS
 <!-- parallelizable: false -->
-- [ ] Add API host (`dotnet new coreex-api`) — details: Phase 6 Step 1
-- [ ] Controllers: roster, dispatch, alert, feed, ref-data — details: Phase 6 Step 2
-- [ ] Configure CORS (Vite origin) + OpenAPI/NSwag — details: Phase 6 Step 3
+- [x] Add API host (`dotnet new coreex-api`) — details: Phase 6 Step 1 — checkbox was stale; `ApexDynamics.TitanWatch.ResponseSys.Api` host exists, builds, and is exercised by all `Test.Api` integration tests
+- [x] Controllers: roster, dispatch, alert, feed, ref-data — details: Phase 6 Step 2 — `RosterReadController`/`RosterController` (CQRS split, first `[OpenApiTag]` usage), `DispatchController`, `AlertController` (new), `FeedController`, ref-data controller all present
+- [ ] Configure CORS (Vite origin) + OpenAPI/NSwag — details: Phase 6 Step 3 — NSwag/Swagger confirmed working (`HostTests.Swagger_UI`/`Swagger_Json`); CORS for the Vite origin not yet verified/configured
 
 ### Phase 7: Outbox Relay & Subscribe hosts
 <!-- parallelizable: true -->
@@ -77,7 +77,7 @@ Derived objective: keep the existing UI and `types.ts` contract shape intact so 
 
 ### Phase 9: Testing & validation
 <!-- parallelizable: false -->
-- [~] API/unit/intra-domain tests (`coreex-test-api`, `dotnet test`) — READ tests done for all 4 GET verticals (25/25 pass); mutate/outbox tests pending with Phase 4 commands
+- [x] API/unit/intra-domain tests (`coreex-test-api`, `dotnet test`) — READ tests for all 4 GET verticals + new `DispatchMutateTests`/`AlertMutateTests` (outbox-event assertions via `ExpectPostgresOutboxEvents`/`AssertMetadata`/`AssertWithValue`); full `Test.Api` suite 33/33 pass
 - [x] `Test.Unit` component tests for pure simulation logic — extracted `LeviathanMotion` (motion/HP/status-band math) + injectable `IRandomSource` out of `SimulationService`; `LeviathanMotionTests.cs` (10 NUnit tests, AwesomeAssertions) covers clamping, landfall wrap, status bands, position lerp — 10/10 pass
 - [ ] Front-end adapter tests + `npm test` / `npm run build` — details: Phase 9 Step 2
 

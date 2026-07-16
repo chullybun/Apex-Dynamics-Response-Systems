@@ -1,3 +1,6 @@
+global using ApexDynamics.TitanWatch.ResponseSys.Application.Repositories;
+global using ApexDynamics.TitanWatch.ResponseSys.Application.Validators;
+global using ApexDynamics.TitanWatch.ResponseSys.Contracts;
 global using CoreEx;
 global using CoreEx.Data;
 global using CoreEx.DependencyInjection;
@@ -7,5 +10,3 @@ global using CoreEx.Localization;
 global using CoreEx.RefData;
 global using CoreEx.RefData.Abstractions;
 global using CoreEx.Validation;
-global using ApexDynamics.TitanWatch.ResponseSys.Contracts;
-global using ApexDynamics.TitanWatch.ResponseSys.Application.Repositories;
