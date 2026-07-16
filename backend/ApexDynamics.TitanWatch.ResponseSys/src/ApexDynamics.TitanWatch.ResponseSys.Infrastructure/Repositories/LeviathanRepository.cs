@@ -23,4 +23,25 @@ public class LeviathanRepository(ResponseSysEfDb ef) : ILeviathanRepository
 
         return items.FirstOrDefault();
     }
+
+    /// <inheritdoc/>
+    public async Task UpdateAsync(Contracts.Leviathan leviathan, CancellationToken cancellationToken = default)
+    {
+        leviathan.ThrowIfNull();
+
+        // Read the current persistence model (preserving identity, track geometry, and change-log columns), then apply only the simulation-mutated live state.
+        var model = await _ef.Model<Persistence.Leviathan>().GetAsync(leviathan.Id, cancellationToken).ConfigureAwait(false);
+        if (model is null)
+            return;
+
+        model.Hp = leviathan.Hp;
+        model.Speed = leviathan.Speed;
+        model.Repel = leviathan.Repel;
+        model.Range = leviathan.Range;
+        model.Lng = leviathan.Lng;
+        model.Lat = leviathan.Lat;
+        model.StatusCode = leviathan.StatusCode;
+
+        await _ef.Model<Persistence.Leviathan>().UpdateAsync(model, cancellationToken).ConfigureAwait(false);
+    }
 }

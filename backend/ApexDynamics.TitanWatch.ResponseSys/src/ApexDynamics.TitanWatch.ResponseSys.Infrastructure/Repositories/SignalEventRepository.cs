@@ -22,4 +22,22 @@ public class SignalEventRepository(ResponseSysEfDb ef) : ISignalEventRepository
 
         return items.FirstOrDefault();
     }
+
+    /// <inheritdoc/>
+    public async Task<Contracts.SignalEvent> CreateAsync(Contracts.SignalEvent signalEvent, CancellationToken cancellationToken = default)
+    {
+        signalEvent.ThrowIfNull();
+
+        var model = new Persistence.SignalEvent
+        {
+            Id = signalEvent.Id,
+            SeverityCode = signalEvent.SeverityCode,
+            Message = signalEvent.Message,
+            Timestamp = signalEvent.Timestamp,
+            LeviathanId = signalEvent.LeviathanId
+        };
+
+        var result = await _ef.Model<Persistence.SignalEvent>().CreateAsync(model, cancellationToken).ConfigureAwait(false);
+        return SignalEventMapper.Map(result.Value);
+    }
 }

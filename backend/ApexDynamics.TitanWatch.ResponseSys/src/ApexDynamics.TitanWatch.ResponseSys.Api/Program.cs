@@ -52,7 +52,7 @@ public class Program
             .AddPostgresDatabase()                      // Adds the PostgresDatabase.
             .AddPostgresUnitOfWork()                    // Adds the PostgresUnitOfWork for the PostgresDatabase.
             .AddEventFormatter()                        // Adds the EventFormatter to enable message formatting for publishing.
-            .AddPostgresOutboxPublisher()               // Adds the PostgresOutboxPublisher as the IEventPublisher.
+            .AddPostgresOutboxPublisher((_, c) => c.Statement = "SELECT \"responsesys\".\"fn_outbox_enqueue\"")               // Adds the PostgresOutboxPublisher as the IEventPublisher.
             .AddDbContext<ResponseSysDbContext>()       // Adds the standard EF DbContext.
             .AddEfDb<ResponseSysEfDb>();                // Adds the CoreEx extended EF service.
 
@@ -61,6 +61,10 @@ public class Program
 
         // Add the ASP.NET Core services.
         builder.Services.AddControllers();
+
+        // Register the server-authoritative simulation engine (timer-based hosted service). Disabled under test (Simulation:Enabled=false) so the feed stays deterministic.
+        if (builder.Configuration.GetValue("Simulation:Enabled", true))
+            builder.Services.AddHostedService<SimulationHostedService>();
 
         // Add the OpenAPI services.
         builder.Services.AddOpenApiDocument(s =>
@@ -85,6 +89,7 @@ public class Program
         app.UseExecutionContext();
         app.UseIdempotencyKey();
         app.MapControllers();
+        app.MapHostedServices();   // Exposes /hosted-services/{name}/pause|resume|status management endpoints for the simulation engine.
 
         app.UseOpenApi();
         app.UseSwaggerUi();

@@ -47,7 +47,7 @@ Derived objective: keep the existing UI and `types.ts` contract shape intact so 
 
 ### Phase 4: Application services & validation
 <!-- parallelizable: false -->
-- [~] `RosterService` (Get, GetById, GetLive) — `LeviathanService` done (GetAll, GetById); GetLive (sim-derived) deferred to Phase 5
+- [~] `RosterService` (Get, GetById, GetLive) — `LeviathanService` done (GetAll, GetById); GetLive not needed — simulation writes directly to `leviathan` table, so existing GetAll/GetById already reflect live state
 - [x] Read services for all 4 entities — Leviathan/SignalEvent(paged)/DispatchUnit/LastStandCity services + repositories + GET controllers (`/roster`, `/feed`, `/dispatch`, `/cities`); all runtime-verified
 - [ ] `DispatchService` (deploy w/ capacity validation + repel effect) — command side, details: Phase 4 Step 2
 - [ ] `AlertService` (raise/stand-down) — command side, details: Phase 4 Step 3
@@ -55,8 +55,8 @@ Derived objective: keep the existing UI and `types.ts` contract shape intact so 
 
 ### Phase 5: Server-authoritative simulation engine
 <!-- parallelizable: false -->
-- [ ] Port motion/HP model (`tickLeviathans`, `deriveAdvance`) to a C# `IHostedService` tick loop — details: Phase 5 Step 1
-- [ ] Port Poisson feed generator (`makeSignalEvent`, `scheduleNext`) → persist `SignalEvent` + publish via outbox — details: Phase 5 Step 2
+- [x] Port motion/HP model (`tickLeviathans`, `deriveAdvance`) to a C# `IHostedService` tick loop — `SimulationHostedService : TimerHostedServiceBase` (1s interval), `SimulationService.TickAsync`; runtime-verified (HP/speed/position/status update each tick, persisted via `LeviathanRepository.UpdateAsync`)
+- [x] Port Poisson feed generator (`makeSignalEvent`, `scheduleNext`) → persist `SignalEvent` + publish via outbox — runtime-verified: `signal_event` INSERT + `SELECT "responsesys"."fn_outbox_enqueue"` succeed every tick after fixing the outbox `Statement` override (see log)
 
 ### Phase 6: API host, endpoints, OpenAPI & CORS
 <!-- parallelizable: false -->
@@ -78,6 +78,7 @@ Derived objective: keep the existing UI and `types.ts` contract shape intact so 
 ### Phase 9: Testing & validation
 <!-- parallelizable: false -->
 - [~] API/unit/intra-domain tests (`coreex-test-api`, `dotnet test`) — READ tests done for all 4 GET verticals (25/25 pass); mutate/outbox tests pending with Phase 4 commands
+- [x] `Test.Unit` component tests for pure simulation logic — extracted `LeviathanMotion` (motion/HP/status-band math) + injectable `IRandomSource` out of `SimulationService`; `LeviathanMotionTests.cs` (10 NUnit tests, AwesomeAssertions) covers clamping, landfall wrap, status bands, position lerp — 10/10 pass
 - [ ] Front-end adapter tests + `npm test` / `npm run build` — details: Phase 9 Step 2
 
 ## Planning Log Reference

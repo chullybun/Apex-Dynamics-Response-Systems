@@ -14,4 +14,10 @@ public interface ISignalEventRepository
     /// <param name="cancellationToken">The <see cref="CancellationToken"/>.</param>
     /// <returns>The <see cref="SignalEvent"/> where found; otherwise, <c>null</c>.</returns>
     Task<SignalEvent?> GetAsync(string id, CancellationToken cancellationToken = default);
+
+    /// <summary>Creates a new <see cref="SignalEvent"/>.</summary>
+    /// <param name="signalEvent">The <see cref="SignalEvent"/> to create.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/>.</param>
+    /// <returns>The created <see cref="SignalEvent"/>.</returns>
+    Task<SignalEvent> CreateAsync(SignalEvent signalEvent, CancellationToken cancellationToken = default);
 }

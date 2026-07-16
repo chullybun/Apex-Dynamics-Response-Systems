@@ -13,4 +13,9 @@ public interface ILeviathanRepository
     /// <param name="cancellationToken">The <see cref="CancellationToken"/>.</param>
     /// <returns>The <see cref="Leviathan"/> where found; otherwise, <c>null</c>.</returns>
     Task<Leviathan?> GetAsync(string id, CancellationToken cancellationToken = default);
+
+    /// <summary>Updates the mutable live-state (HP, speed, repel, range, position, status) of the specified <see cref="Leviathan"/>.</summary>
+    /// <param name="leviathan">The <see cref="Leviathan"/> carrying the updated live state.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/>.</param>
+    Task UpdateAsync(Leviathan leviathan, CancellationToken cancellationToken = default);
 }
