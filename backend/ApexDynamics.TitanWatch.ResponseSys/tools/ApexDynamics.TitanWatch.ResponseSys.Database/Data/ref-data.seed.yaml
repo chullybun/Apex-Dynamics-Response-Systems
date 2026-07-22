@@ -1,0 +1,24 @@
+# Reference-data seed rows (cross-environment). Applied by `dotnet run -- Data`.
+# Rows use the `$^` prefix: merge + auto-generate the identifier. Never include the
+# `<table>_id` column, `is_active`, or `sort_order` (sort_order is positional by row order).
+#
+# ThreatLevel rows are ordered by rank (Dormant -> Cataclysm) so the positional
+# sort_order preserves the severity ranking; `color` mirrors src/mock/severity.ts.
+responsesys:
+  - $^threat_level:
+    - { code: DOR, text: Dormant,   color: '#10b981' }
+    - { code: STR, text: Stirring,  color: '#facc15' }
+    - { code: ELV, text: Elevated,  color: '#f97316' }
+    - { code: CRI, text: Critical,  color: '#ef4444' }
+    - { code: CAT, text: Cataclysm, color: '#b91c1c' }
+  - $^leviathan_status:
+    - SUB: Submerged
+    - SUR: Surfaced
+    - INB: Inbound
+    - LND: Landfall
+    - CON: Contained
+  - $^signal_severity:
+    - INF: Info
+    - WRN: Warn
+    - OPS: Ops
+    - CRT: Crit

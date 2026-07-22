@@ -1,0 +1,23 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="docker-compose.yml" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src\ApexDynamics.TitanWatch.ResponseSys.Contracts\ApexDynamics.TitanWatch.ResponseSys.Contracts.csproj" />
+    <Project Path="src\ApexDynamics.TitanWatch.ResponseSys.Application\ApexDynamics.TitanWatch.ResponseSys.Application.csproj" />
+    <Project Path="src\ApexDynamics.TitanWatch.ResponseSys.Infrastructure\ApexDynamics.TitanWatch.ResponseSys.Infrastructure.csproj" />
+    <Project Path="src\ApexDynamics.TitanWatch.ResponseSys.Api\ApexDynamics.TitanWatch.ResponseSys.Api.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools\ApexDynamics.TitanWatch.ResponseSys.Database\ApexDynamics.TitanWatch.ResponseSys.Database.csproj" />
+    <Project Path="tools\ApexDynamics.TitanWatch.ResponseSys.CodeGen\ApexDynamics.TitanWatch.ResponseSys.CodeGen.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests\ApexDynamics.TitanWatch.ResponseSys.Test.Common\ApexDynamics.TitanWatch.ResponseSys.Test.Common.csproj" />
+    <Project Path="tests\ApexDynamics.TitanWatch.ResponseSys.Test.Unit\ApexDynamics.TitanWatch.ResponseSys.Test.Unit.csproj" />
+    <Project Path="tests\ApexDynamics.TitanWatch.ResponseSys.Test.Api\ApexDynamics.TitanWatch.ResponseSys.Test.Api.csproj" />
+  </Folder>
+</Solution>

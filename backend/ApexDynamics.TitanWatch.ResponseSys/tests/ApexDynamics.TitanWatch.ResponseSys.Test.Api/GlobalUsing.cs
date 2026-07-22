@@ -1,0 +1,11 @@
+global using CoreEx;
+global using CoreEx.Database.Postgres.Outbox;
+global using AwesomeAssertions;
+global using NUnit.Framework;
+global using System.Net;
+global using UnitTestEx;
+global using UnitTestEx.NUnit;
+global using UnitTestEx.Expectations;
+global using ApexDynamics.TitanWatch.ResponseSys.Contracts;
+global using DbMigration = ApexDynamics.TitanWatch.ResponseSys.Database.Program;
+global using TestData = ApexDynamics.TitanWatch.ResponseSys.Test.Common.TestData;

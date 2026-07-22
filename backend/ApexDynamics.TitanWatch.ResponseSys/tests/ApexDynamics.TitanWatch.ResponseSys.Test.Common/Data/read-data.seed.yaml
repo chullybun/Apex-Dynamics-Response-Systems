@@ -1,0 +1,24 @@
+# Read test dataset for the 'ResponseSys' domain — loaded by the XxxReadTests classes via:
+#   MigratePostgresDataAsync<TestData>(["read-data.seed.yaml"], DbMigration.ConfigureMigrationArgs)
+#
+# IMPORTANT — what the test migration path already seeds for you:
+#   ConfigureMigrationArgs adds the Database assembly, so every test migrate ALSO applies the
+#   production Data phase: 'ref-data.seed.yaml' (threat_level / leviathan_status / signal_severity
+#   codes) AND 'masters.seed.pgsql' (the 4-strong leviathan roster, 4 dispatch_unit rows, 2
+#   last_stand_city rows). DataResetFilterPredicate resets the 'responsesys' schema first, so this
+#   runs cleanly every cycle. Therefore:
+#     * DO NOT re-seed ref-data or leviathan/dispatch_unit/last_stand_city here — that collides with
+#       the production seed (duplicate-key) within the same cycle. The Roster/Dispatch/Cities read
+#       tests assert against the deterministic production masters data instead.
+#     * 'signal_event' is the ONLY table with no production seed, so it is seeded here to give the
+#       feed read/paging tests a small, deterministic, order-assertable dataset.
+#
+# DbEx YAML: schema -> '- <table>:' -> rows (inline objects, PostgreSQL lowercase snake_case).
+# Id columns are VARCHAR(50); leviathan_id values reference production masters rows (lev-1..lev-3).
+responsesys:
+  # Signal feed (GET /feed ORDER BY timestamp DESC -> sig-4, sig-3, sig-2, sig-1; total = 4).
+  - signal_event:
+    - { signal_event_id: sig-1, timestamp: 1000, severity_code: INF, message: Sensor baseline nominal,    leviathan_id: lev-1 }
+    - { signal_event_id: sig-2, timestamp: 2000, severity_code: WRN, message: Subsurface tremor detected, leviathan_id: lev-1 }
+    - { signal_event_id: sig-3, timestamp: 3000, severity_code: OPS, message: Dispatch units mobilizing,  leviathan_id: lev-2 }
+    - { signal_event_id: sig-4, timestamp: 4000, severity_code: CRT, message: Landfall imminent,          leviathan_id: lev-3 }

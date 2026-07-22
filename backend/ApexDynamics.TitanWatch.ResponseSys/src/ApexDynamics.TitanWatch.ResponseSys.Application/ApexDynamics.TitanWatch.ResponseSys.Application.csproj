@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\ApexDynamics.TitanWatch.ResponseSys.Contracts\ApexDynamics.TitanWatch.ResponseSys.Contracts.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CoreEx.Data" />
+    <PackageReference Include="CoreEx.RefData" />
+    <PackageReference Include="CoreEx.Validation" />
+  </ItemGroup>
+</Project>

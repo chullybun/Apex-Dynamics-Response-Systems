@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="CoreEx" />
+    <PackageReference Include="CoreEx.RefData" />
+  </ItemGroup>
+</Project>
